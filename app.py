@@ -1,4 +1,5 @@
 import streamlit as st
+import json
 from layout_engine import generate_layout_image
 from utils import parse_prompt
 
