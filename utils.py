@@ -8,7 +8,7 @@ def singularize(noun):
     if noun.endswith("ies"):
         return noun[:-3] + "y"
     elif noun.endswith("sses") or noun.endswith("shes") or noun.endswith("ches"):
-        return noun[:-2]  # e.g., "offices" → "office"
+        return noun[:-2]
     elif noun.endswith("s") and not noun.endswith("ss"):
         return noun[:-1]
     return noun
@@ -43,5 +43,6 @@ def parse_prompt(prompt, room_data=None):
             room_counts[cleaned_room] = room_counts.get(cleaned_room, 0) + count
         else:
             print(f"[!] Warning: Room '{cleaned_room}' not in room_database.json — ignored.")
-print("Parsed room counts:", room_counts)
-    return room_counts
+
+    print("✅ Parsed room counts:", room_counts)
+    return list(room_counts.items())
