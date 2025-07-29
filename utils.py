@@ -1,25 +1,47 @@
 import re
+import json
+import os
 
-def parse_prompt(prompt):
-    """
-    Extracts room types and quantities from a natural language prompt.
+# === Singularization helper ===
+def singularize(noun):
+    noun = noun.lower().strip()
+    if noun.endswith("ies"):
+        return noun[:-3] + "y"
+    elif noun.endswith("sses") or noun.endswith("shes") or noun.endswith("ches"):
+        return noun[:-2]  # e.g., "offices" → "office"
+    elif noun.endswith("s") and not noun.endswith("ss"):
+        return noun[:-1]
+    return noun
 
-    Example input: "A hospital with 2 procedure rooms and 5 patient rooms and a lobby"
-    Output: [("Procedure Room", 2), ("Patient Room", 5), ("Lobby", 1)]
-    """
+# === Load room types from room_database.json ===
+def load_room_database(json_path="room_database.json"):
+    if not os.path.exists(json_path):
+        raise FileNotFoundError(f"{json_path} not found")
+
+    with open(json_path, "r") as f:
+        room_data = json.load(f)
+
+    # Normalize keys
+    return {singularize(k.lower()): v for k, v in room_data.items()}
+
+# === NLP-style prompt parser ===
+def parse_prompt(prompt, room_data=None):
     prompt = prompt.lower()
-    # Normalize common phrases
-    prompt = prompt.replace("a ", "1 ").replace("an ", "1 ")
+    room_counts = {}
 
-    # Match room phrases like "3 exam rooms", "1 lobby"
-    pattern = r'(\d+)\s+([a-z\s]+?)(?:s|room|rooms)?(?=,| and|$)'
-    matches = re.findall(pattern, prompt)
+    if room_data is None:
+        room_data = load_room_database()
 
-    rooms = []
-    for count, name in matches:
-        name = name.strip().replace("room", "").replace("area", "").title()
-        if not name.endswith("Room") and name.lower() not in ["lobby", "pantry", "cafe", "reception"]:
-            name += " Room"
-        rooms.append((name.strip(), int(count)))
+    # Match phrases like "3 exam rooms", "2 procedure rooms"
+    matches = re.findall(r'(\d+)\s+([a-zA-Z\s]+?)(?:s|room|rooms)?(?:,|\.|\s|$)', prompt)
 
-    return rooms
+    for count_str, room_str in matches:
+        count = int(count_str)
+        cleaned_room = singularize(room_str.strip())
+
+        if cleaned_room in room_data:
+            room_counts[cleaned_room] = room_counts.get(cleaned_room, 0) + count
+        else:
+            print(f"[!] Warning: Room '{cleaned_room}' not in room_database.json — ignored.")
+
+    return room_counts
