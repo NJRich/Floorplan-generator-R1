@@ -5,7 +5,7 @@ from utils import parse_prompt
 
 # Streamlit UI
 st.set_page_config(page_title="AI Floor Plan Generator", layout="centered")
-st.title("🧠 AI Floor Plan Generator")
+st.title("🧠 AI Floor Plan Generator - REVISION 1")
 st.write("Describe your space and we'll generate a basic schematic layout.")
 
 # Prompt Input
@@ -25,4 +25,4 @@ if st.button("Generate Floor Plan"):
         except Exception as e:
             st.error(f"Something went wrong: {e}")
 
-st.title("🧠 AI Floor Plan Generator - REVISION 1")
+
