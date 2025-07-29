@@ -1,3 +1,8 @@
+ if not parsed_prompt:
+        print("❌ No valid rooms parsed from prompt.")
+        return None
+
+    print("🔍 Generating layout for rooms:", parsed_prompt)
 import json
 from PIL import Image, ImageDraw
 
