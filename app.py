@@ -1,24 +1,26 @@
 import streamlit as st
-from layout_engine import generate_floorplan_image
+from layout_engine import generate_layout_image
+from utils import parse_prompt
 
-# Streamlit setup
+# Streamlit UI
 st.set_page_config(page_title="AI Floor Plan Generator", layout="centered")
 st.title("🧠 AI Floor Plan Generator")
-st.write("Describe your space and we’ll generate a basic layout.")
+st.write("Describe your space and we'll generate a basic schematic layout.")
 
-# Prompt input
-prompt = st.text_area("✍️ Describe your space:", placeholder="e.g. A clinic with 3 exam rooms and a waiting area")
+# Prompt Input
+user_prompt = st.text_area("✍️ Describe your space:", 
+                           placeholder="e.g. A radiology clinic with 4 exam rooms, a waiting area, 2 staff offices, and a pantry")
 
-# Generate button
 if st.button("Generate Floor Plan"):
-    if not prompt.strip():
-        st.warning("Please enter a space description.")
+    if not user_prompt.strip():
+        st.warning("Please enter a description.")
     else:
-        st.info("Generating floor plan...")
-        image = generate_floorplan_image(prompt)
-        if image:
-            st.success("✅ Floor plan generated!")
-            st.image(image, caption="Auto-generated floor plan", use_container_width=True)
-            st.markdown(f"**Prompt:** {prompt}")
-        else:
-            st.error("Sorry, we couldn’t recognize any rooms from your prompt.")
+        st.info("Processing prompt and generating layout...")
+        try:
+            room_list = parse_prompt(user_prompt)
+            image = generate_layout_image(room_list)
+            st.image(image, caption="AI-generated schematic floor plan", use_container_width=True)
+            st.success("✅ Done!")
+        except Exception as e:
+            st.error(f"Something went wrong: {e}")
+
