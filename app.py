@@ -24,3 +24,4 @@ if st.button("Generate Floor Plan"):
         except Exception as e:
             st.error(f"Something went wrong: {e}")
 
+st.title("🧠 AI Floor Plan Generator - REVISION 1")
