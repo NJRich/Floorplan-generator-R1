@@ -1,8 +1,3 @@
- if not parsed_prompt:
-        print("❌ No valid rooms parsed from prompt.")
-        return None
-
-    print("🔍 Generating layout for rooms:", parsed_prompt)
 import json
 from PIL import Image, ImageDraw
 
@@ -12,7 +7,8 @@ with open("room_database.json", "r") as f:
 
 def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
     """
-    Takes parsed rooms and returns a Pillow image with a basic floor plan.
+    Takes parsed rooms as a dictionary and returns a Pillow image with a basic floor plan.
+    parsed_rooms should be like: {'lobby': 1, 'exam room': 4}
     """
     wall_px = int(wall_thickness_ft * scale)
     margin = 20
@@ -21,21 +17,25 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
 
     # Build list of (name, width_ft, height_ft)
     room_list = []
-    for room_type, count in parsed_rooms:
+    for room_type, count in parsed_rooms.items():
         if room_type in ROOM_DATABASE:
             width, height = ROOM_DATABASE[room_type]["size_ft"]
             for i in range(count):
                 label = f"{room_type} {i+1}" if count > 1 else room_type
                 room_list.append((label, width, height))
         else:
-            print(f"⚠️ Room type not found: {room_type}")
+            print(f"⚠️ Room type not found: '{room_type}'")
 
-    # Simple even split layout
+    if not room_list:
+        print("❌ No valid rooms were added to the layout.")
+        return None
+
+    # Simple layout: split into two rows
     mid = len(room_list) // 2
     top_row = room_list[:mid]
     bottom_row = room_list[mid:]
 
-    # Calculate canvas size
+    # Calculate canvas size in feet
     top_width = sum(r[1] for r in top_row)
     bottom_width = sum(r[1] for r in bottom_row)
     canvas_width_ft = max(top_width, bottom_width)
@@ -43,6 +43,7 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
     bottom_height = max((r[2] for r in bottom_row), default=0)
     canvas_height_ft = top_height + bottom_height + corridor_width_ft + 2 * wall_thickness_ft
 
+    # Convert to pixels
     img_w = int((canvas_width_ft + 2 * wall_thickness_ft) * scale) + 2 * margin
     img_h = int(canvas_height_ft * scale) + 2 * margin
     img = Image.new("RGB", (img_w, img_h), "white")
@@ -59,3 +60,11 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
             x2 = x1 + int(w_ft * scale)
             y2 = y1 + int(h_ft * scale)
             draw.rectangle([x1, y1, x2, y2], fill="#e6f2ff", outline="black", width=wall_px)
+            draw.text((x1 + 5, y1 + 5), name, fill="black")
+            x_cursor_ft += w_ft
+
+    # Draw top and bottom rows
+    draw_rooms(top_row, 0)
+    draw_rooms(bottom_row, top_height + corridor_width_ft)
+
+    return img
