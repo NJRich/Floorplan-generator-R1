@@ -1,4 +1,11 @@
 {
+  "lobby": {
+  "name": "Lobby",
+  "min_size_sqft": 200,
+  "max_size_sqft": 500,
+  "recommended_size_sqft": 350,
+  "source": "BOMA"
+}
   "exam_room": {
     "name": "Exam Room",
     "min_size_sqft": 100,
