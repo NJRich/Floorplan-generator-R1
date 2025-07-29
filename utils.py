@@ -43,5 +43,5 @@ def parse_prompt(prompt, room_data=None):
             room_counts[cleaned_room] = room_counts.get(cleaned_room, 0) + count
         else:
             print(f"[!] Warning: Room '{cleaned_room}' not in room_database.json — ignored.")
-
+print("Parsed room counts:", room_counts)
     return room_counts
