@@ -8,7 +8,7 @@ with open("room_database.json", "r") as f:
 def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
     """
     Takes parsed rooms as a dictionary and returns a Pillow image with a basic floor plan.
-    parsed_rooms should be like: {'lobby': 1, 'exam room': 4}
+    parsed_rooms should be like: {'lobby': 1, 'exam_room': 4}
     """
     wall_px = int(wall_thickness_ft * scale)
     margin = 20
@@ -16,31 +16,31 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
     bottom_row = []
 
     # Build list of (name, width_ft, height_ft)
-   # Build list of (name, width_ft, height_ft)
-room_list = []
-for room_type, count in parsed_rooms.items():
-    if room_type in ROOM_DATABASE:
-        recommended_sqft = ROOM_DATABASE[room_type]["recommended_size_sqft"]
-        side = (recommended_sqft) ** 0.5
-        width = round(side, 1)
-        height = round(recommended_sqft / width, 1)
+    room_list = []
+    for room_type, count in parsed_rooms.items():
+        if room_type in ROOM_DATABASE:
+            # Compute width and height from square footage
+            sqft = ROOM_DATABASE[room_type]["recommended_size_sqft"]
+            side = sqft ** 0.5
+            width = round(side, 1)
+            height = round(sqft / width, 1)
 
-        for i in range(count):
-            label = f"{room_type} {i+1}" if count > 1 else room_type
-            room_list.append((label, width, height))
-    else:
-        print(f"⚠️ Room type not found: '{room_type}'")
+            for i in range(count):
+                label = f"{room_type.replace('_', ' ').title()} {i+1}" if count > 1 else room_type.replace('_', ' ').title()
+                room_list.append((label, width, height))
+        else:
+            print(f"⚠️ Room type not found: '{room_type}'")
 
     if not room_list:
         print("❌ No valid rooms were added to the layout.")
         return None
 
-    # Simple layout: split into two rows
+    # Split into two rows for simple layout
     mid = len(room_list) // 2
     top_row = room_list[:mid]
     bottom_row = room_list[mid:]
 
-    # Calculate canvas size in feet
+    # Calculate canvas dimensions
     top_width = sum(r[1] for r in top_row)
     bottom_width = sum(r[1] for r in bottom_row)
     canvas_width_ft = max(top_width, bottom_width)
