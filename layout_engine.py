@@ -1,76 +1,56 @@
-from PIL import Image, ImageDraw, ImageFont
+import json
+from PIL import Image, ImageDraw
 
-# Load a default font (this prevents the 'NoneType' error)
-font = ImageFont.load_default()
+# Load the room database
+with open("room_database.json", "r") as f:
+    ROOM_DATABASE = json.load(f)
 
-# Constants
-SCALE = 10  # 1 foot = 10 pixels
-WALL_THICKNESS_FT = 0.5
-CORRIDOR_WIDTH_FT = 6.0
-MARGIN_PX = 20
-
-# Default sizes in feet (width, depth)
-DEFAULT_ROOM_SIZES = {
-    "exam room": (10.0, 13.0),
-    "waiting area": (12.0, 12.0),
-    "cafe": (15.0, 15.0),
-    "lobby": (18.0, 18.0),
-    "staff open office": (20.0, 15.0),
-    "pantry": (10.0, 10.0)
-}
-
-
-def generate_layout_image(room_list):
+def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
     """
-    Draws a simple 2-row floor plan with a horizontal corridor in the middle.
+    Takes parsed rooms and returns a Pillow image with a basic floor plan.
     """
-    # Divide into top and bottom rows (split evenly)
-    half = len(room_list) // 2
-    top_rooms = room_list[:half]
-    bottom_rooms = room_list[half:]
+    wall_px = int(wall_thickness_ft * scale)
+    margin = 20
+    top_row = []
+    bottom_row = []
 
-    top_depth = max(room["depth"] for room in top_rooms) if top_rooms else 0
-    bottom_depth = max(room["depth"] for room in bottom_rooms) if bottom_rooms else 0
-    corridor_length = max(sum(room["width"] for room in top_rooms),
-                          sum(room["width"] for room in bottom_rooms))
+    # Build list of (name, width_ft, height_ft)
+    room_list = []
+    for room_type, count in parsed_rooms:
+        if room_type in ROOM_DATABASE:
+            width, height = ROOM_DATABASE[room_type]["size_ft"]
+            for i in range(count):
+                label = f"{room_type} {i+1}" if count > 1 else room_type
+                room_list.append((label, width, height))
+        else:
+            print(f"⚠️ Room type not found: {room_type}")
 
-    # Compute overall image size
-    wall_px = int(WALL_THICKNESS_FT * SCALE)
-    interior_width = corridor_length
-    interior_height = top_depth + CORRIDOR_WIDTH_FT + bottom_depth
+    # Simple even split layout
+    mid = len(room_list) // 2
+    top_row = room_list[:mid]
+    bottom_row = room_list[mid:]
 
-    img_w = int((interior_width + 2 * WALL_THICKNESS_FT) * SCALE) + 2 * MARGIN_PX
-    img_h = int((interior_height + 2 * WALL_THICKNESS_FT) * SCALE) + 2 * MARGIN_PX
+    # Calculate canvas size
+    top_width = sum(r[1] for r in top_row)
+    bottom_width = sum(r[1] for r in bottom_row)
+    canvas_width_ft = max(top_width, bottom_width)
+    top_height = max((r[2] for r in top_row), default=0)
+    bottom_height = max((r[2] for r in bottom_row), default=0)
+    canvas_height_ft = top_height + bottom_height + corridor_width_ft + 2 * wall_thickness_ft
 
+    img_w = int((canvas_width_ft + 2 * wall_thickness_ft) * scale) + 2 * margin
+    img_h = int(canvas_height_ft * scale) + 2 * margin
     img = Image.new("RGB", (img_w, img_h), "white")
     draw = ImageDraw.Draw(img)
 
-    offset_x = MARGIN_PX + int(WALL_THICKNESS_FT * SCALE)
-    offset_y = MARGIN_PX + int(WALL_THICKNESS_FT * SCALE)
+    offset_x = margin + int(wall_thickness_ft * scale)
+    offset_y = margin + int(wall_thickness_ft * scale)
 
-    # Draw function for each row
-    def draw_row(rooms, y_start_ft):
+    def draw_rooms(rooms, y_start_ft):
         x_cursor_ft = 0.0
-        for room in rooms:
-            x1 = offset_x + int(x_cursor_ft * SCALE)
-            y1 = offset_y + int(y_start_ft * SCALE)
-            x2 = x1 + int(room["width"] * SCALE)
-            y2 = y1 + int(room["depth"] * SCALE)
-
+        for name, w_ft, h_ft in rooms:
+            x1 = offset_x + int(x_cursor_ft * scale)
+            y1 = offset_y + int(y_start_ft * scale)
+            x2 = x1 + int(w_ft * scale)
+            y2 = y1 + int(h_ft * scale)
             draw.rectangle([x1, y1, x2, y2], fill="#e6f2ff", outline="black", width=wall_px)
-            draw.text((x1 + 5, y1 + 5), room["name"], fill="black", font=font)
-
-            x_cursor_ft += room["width"]
-
-    # Draw top rooms, corridor, bottom rooms
-    draw_row(top_rooms, 0)
-    draw_row(bottom_rooms, top_depth + CORRIDOR_WIDTH_FT)
-
-    # Draw corridor
-    cx1 = offset_x
-    cx2 = offset_x + int(corridor_length * SCALE)
-    cy1 = offset_y + int(top_depth * SCALE)
-    cy2 = cy1 + int(CORRIDOR_WIDTH_FT * SCALE)
-    draw.rectangle([cx1, cy1, cx2, cy2], fill="lightgray")
-
-    return img
