@@ -16,15 +16,20 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
     bottom_row = []
 
     # Build list of (name, width_ft, height_ft)
-    room_list = []
-    for room_type, count in parsed_rooms.items():
-        if room_type in ROOM_DATABASE:
-            width, height = ROOM_DATABASE[room_type]["size_ft"]
-            for i in range(count):
-                label = f"{room_type} {i+1}" if count > 1 else room_type
-                room_list.append((label, width, height))
-        else:
-            print(f"⚠️ Room type not found: '{room_type}'")
+   # Build list of (name, width_ft, height_ft)
+room_list = []
+for room_type, count in parsed_rooms.items():
+    if room_type in ROOM_DATABASE:
+        recommended_sqft = ROOM_DATABASE[room_type]["recommended_size_sqft"]
+        side = (recommended_sqft) ** 0.5
+        width = round(side, 1)
+        height = round(recommended_sqft / width, 1)
+
+        for i in range(count):
+            label = f"{room_type} {i+1}" if count > 1 else room_type
+            room_list.append((label, width, height))
+    else:
+        print(f"⚠️ Room type not found: '{room_type}'")
 
     if not room_list:
         print("❌ No valid rooms were added to the layout.")
