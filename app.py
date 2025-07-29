@@ -17,14 +17,19 @@ if st.button("Generate Floor Plan"):
         st.warning("Please enter a description of your space.")
     else:
         st.info("Processing prompt and generating layout...")
+
         try:
             parsed_rooms = parse_prompt(user_input)
-            image = generate_layout_image(parsed_rooms)
 
-            if image:
-                st.success("✅ Floor plan generated!")
-                st.image(image, caption="Generated Floor Plan", use_column_width=True)
+            if not parsed_rooms:
+                st.error("No valid rooms were parsed from your prompt. Please make sure the room names match what's in the database.")
             else:
-                st.error("Something went wrong — no image was generated. Please check if the room types in your prompt exist in the database.")
+                image = generate_layout_image(parsed_rooms)
+
+                if image:
+                    st.success("✅ Floor plan generated!")
+                    st.image(image, caption="Generated Floor Plan", use_column_width=True)
+                else:
+                    st.error("Something went wrong — no image was generated.")
         except Exception as e:
-            st.error(f"Something went wrong: {str(e)}")
+            st.error(f"❌ Error: {str(e)}")
