@@ -1,0 +1,44 @@
+{
+  "exam room": {
+    "min_size_ft": [8, 10],
+    "default_size_ft": [10, 13],
+    "max_size_ft": [12, 15],
+    "category": "clinical"
+  },
+  "waiting area": {
+    "min_size_ft": [10, 10],
+    "default_size_ft": [12, 12],
+    "max_size_ft": [20, 20],
+    "category": "public"
+  },
+  "lobby": {
+    "min_size_ft": [12, 12],
+    "default_size_ft": [18, 18],
+    "max_size_ft": [25, 25],
+    "category": "public"
+  },
+  "staff open office": {
+    "min_size_ft": [15, 12],
+    "default_size_ft": [20, 15],
+    "max_size_ft": [30, 20],
+    "category": "office"
+  },
+  "pantry": {
+    "min_size_ft": [6, 8],
+    "default_size_ft": [10, 10],
+    "max_size_ft": [15, 12],
+    "category": "support"
+  },
+  "private office": {
+    "min_size_ft": [8, 10],
+    "default_size_ft": [10, 12],
+    "max_size_ft": [12, 15],
+    "category": "office"
+  },
+  "conference room": {
+    "min_size_ft": [10, 12],
+    "default_size_ft": [15, 20],
+    "max_size_ft": [20, 30],
+    "category": "office"
+  }
+}
