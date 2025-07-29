@@ -20,8 +20,13 @@ def load_room_database(json_path="room_database.json"):
     with open(json_path, "r") as f:
         room_data = json.load(f)
 
-    # Normalize keys
-    return {singularize(k.lower().replace(" ", "_")): v for k, v in room_data.items()}
+    # Normalize keys: exam room → exam_room
+    normalized_data = {}
+    for key, value in room_data.items():
+        normalized_key = singularize(key.lower().replace(" ", "_"))
+        normalized_data[normalized_key] = value
+
+    return normalized_data
 
 # === NLP-style prompt parser ===
 def parse_prompt(prompt, room_data=None):
@@ -31,28 +36,27 @@ def parse_prompt(prompt, room_data=None):
     if room_data is None:
         room_data = load_room_database()
 
-    # Match numeric: "3 exam rooms"
-    numeric_matches = re.findall(r'(\d+)\s+([a-zA-Z_ ]+?)(?:s|room|rooms)?(?:,|\.|\s|$)', prompt)
+    # Match phrases like "3 exam rooms", "a pantry", "1 restroom", etc.
+    matches = re.findall(r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z_ ]+?)(?:s|room|rooms)?(?:,|\.|\s|$)', prompt)
 
-    # Match articles: "a pantry", "an exam room"
-    article_matches = re.findall(r'\b(a|an)\s+([a-zA-Z_ ]+?)(?:s|room|rooms)?(?:,|\.|\s|$)', prompt)
+    for count_str, room_str in matches:
+        count = int(count_str) if count_str else 1
+        base = singularize(room_str.strip().replace(" ", "_"))
 
-    for count_str, room_str in numeric_matches:
-        count = int(count_str)
-        cleaned_room = singularize(room_str.strip().replace(" ", "_"))
-        if cleaned_room in room_data:
-            room_counts[cleaned_room] = room_counts.get(cleaned_room, 0) + count
+        # Try exact match
+        if base in room_data:
+            cleaned = base
+        # Try appending '_room' if needed
+        elif f"{base}_room" in room_data:
+            cleaned = f"{base}_room"
+        # Try matching just the base word
+        elif base.replace("_", "") in [k.replace("_", "") for k in room_data]:
+            cleaned = next(k for k in room_data if k.replace("_", "") == base.replace("_", ""))
         else:
-            print(f"[!] Warning: Room '{room_str.strip()}' → '{cleaned_room}' not in room_database.json")
+            print(f"[!] Warning: Room '{room_str.strip()}' → '{base}' not in room_database.json — skipped.")
+            continue
 
-    for _, room_str in article_matches:
-        cleaned_room = singularize(room_str.strip().replace(" ", "_"))
-        if cleaned_room in room_data:
-            room_counts[cleaned_room] = room_counts.get(cleaned_room, 0) + 1
-        else:
-            print(f"[!] Warning: Room '{room_str.strip()}' → '{cleaned_room}' not in room_database.json")
+        room_counts[cleaned] = room_counts.get(cleaned, 0) + count
 
-    print("🔎 Raw numeric matches:", numeric_matches)
-    print("🔎 Raw article matches:", article_matches)
-    print("✅ Parsed room counts:", room_counts)
+    print("🧾 Parsed room counts:", room_counts)
     return room_counts
