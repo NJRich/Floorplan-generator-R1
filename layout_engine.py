@@ -1,46 +1,57 @@
 import json
 from PIL import Image, ImageDraw
+import math
 
 # Load the room database
 with open("room_database.json", "r") as f:
     ROOM_DATABASE = json.load(f)
 
+def estimate_size_ft(room_data):
+    """
+    Estimate room size in (width, height) feet from recommended_size_sqft.
+    Assumes square room for simplicity.
+    """
+    sqft = room_data.get("recommended_size_sqft", 100)
+    side = math.sqrt(sqft)
+    return round(side, 1), round(side, 1)
+
 def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
     """
-    Takes parsed rooms as a dictionary and returns a Pillow image with a basic floor plan.
-    parsed_rooms should be like: {'lobby': 1, 'exam_room': 4}
+    Takes parsed_rooms as a dictionary and returns a Pillow image with a basic floor plan.
+    parsed_rooms should look like: {'lobby': 1, 'procedure_room': 2}
     """
     wall_px = int(wall_thickness_ft * scale)
     margin = 20
     top_row = []
     bottom_row = []
 
-    # Build list of (name, width_ft, height_ft)
     room_list = []
     for room_type, count in parsed_rooms.items():
         if room_type in ROOM_DATABASE:
-            # Compute width and height from square footage
-            sqft = ROOM_DATABASE[room_type]["recommended_size_sqft"]
-            side = sqft ** 0.5
-            width = round(side, 1)
-            height = round(sqft / width, 1)
+            room_info = ROOM_DATABASE[room_type]
+
+            # Use size_ft if available; else estimate
+            if "size_ft" in room_info:
+                width, height = room_info["size_ft"]
+            else:
+                width, height = estimate_size_ft(room_info)
 
             for i in range(count):
-                label = f"{room_type.replace('_', ' ').title()} {i+1}" if count > 1 else room_type.replace('_', ' ').title()
+                label = f"{room_info['name']} {i+1}" if count > 1 else room_info["name"]
                 room_list.append((label, width, height))
         else:
-            print(f"⚠️ Room type not found: '{room_type}'")
+            print(f"⚠️ Room type not found in database: {room_type}")
 
     if not room_list:
         print("❌ No valid rooms were added to the layout.")
         return None
 
-    # Split into two rows for simple layout
+    # Split into top and bottom rows
     mid = len(room_list) // 2
     top_row = room_list[:mid]
     bottom_row = room_list[mid:]
 
-    # Calculate canvas dimensions
+    # Calculate canvas size
     top_width = sum(r[1] for r in top_row)
     bottom_width = sum(r[1] for r in bottom_row)
     canvas_width_ft = max(top_width, bottom_width)
@@ -68,7 +79,7 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
             draw.text((x1 + 5, y1 + 5), name, fill="black")
             x_cursor_ft += w_ft
 
-    # Draw top and bottom rows
+    # Draw rooms
     draw_rooms(top_row, 0)
     draw_rooms(bottom_row, top_height + corridor_width_ft)
 
