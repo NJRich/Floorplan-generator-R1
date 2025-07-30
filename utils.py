@@ -44,7 +44,13 @@ def parse_prompt(prompt, room_data=None):
 
     for count_str, raw_room in matches:
         count = int(count_str) if count_str else 1
-        cleaned = singularize(raw_room.strip().replace(" ", "_"))  # e.g. nurse station → nurse_station
+
+        # Split into words, singularize only the last word
+        parts = raw_room.strip().lower().split()
+        if not parts:
+            continue
+        parts[-1] = singularize(parts[-1])
+        cleaned = "_".join(parts)  # e.g. "nurse station" → "nurse_station"
 
         matched = None
         if cleaned in room_data:
