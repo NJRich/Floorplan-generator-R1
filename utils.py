@@ -31,41 +31,19 @@ def parse_prompt(prompt, room_data=None):
     if room_data is None:
         room_data = load_room_database()
 
-    known_rooms = list(room_data.keys())
-    print("📦 Known room types:", known_rooms)
+    # Force raw check for keywords
+    keywords = {
+        "patient room": "patient_room",
+        "nurse station": "nurse_station",
+        "dirty utility": "dirty_utility"
+    }
 
-    # Match examples like: "20 patient rooms", "a nurse station", "1 dirty utility"
-    pattern = r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z ]+?)(?:s| room| rooms)?(?=,|\.|\s|$)'
-    matches = re.findall(pattern, prompt)
-    print("🔍 Matches found:", matches)
+    for phrase, key in keywords.items():
+        if phrase in prompt:
+            match = re.search(r'(\d+)\s+' + re.escape(phrase), prompt)
+            count = int(match.group(1)) if match else 1
+            room_counts[key] = count
+            print(f"[✓] Force matched: '{phrase}' → {key} × {count}")
 
-    for count_str, raw_room in matches:
-        count = int(count_str) if count_str else 1
-
-        # Clean up room name
-        words = raw_room.strip().lower().split()
-        if not words:
-            continue
-
-        words[-1] = singularize(words[-1])  # Only singularize last word
-        cleaned = "_".join(words)  # e.g., "nurse station" → "nurse_station"
-
-        matched = None
-        if cleaned in room_data:
-            matched = cleaned
-        elif f"{cleaned}_room" in room_data:
-            matched = f"{cleaned}_room"
-        else:
-            for r in known_rooms:
-                if cleaned.replace("_", "") == r.replace("_", ""):
-                    matched = r
-                    break
-
-        if matched:
-            room_counts[matched] = room_counts.get(matched, 0) + count
-            print(f"[✓] Matched '{raw_room.strip()}' → '{matched}'")
-        else:
-            print(f"[!] Skipped: '{raw_room.strip()}' → '{cleaned}' not found in room database.")
-
-    print("🧾 Final parsed room counts:", room_counts)
+    print("🧾 TEMP parsed room counts:", room_counts)
     return room_counts
