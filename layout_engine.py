@@ -18,15 +18,16 @@ def estimate_size_ft(room_data):
 def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
     """
     Takes parsed_rooms as a dictionary and returns a Pillow image with a basic floor plan.
-    parsed_rooms should look like: {'lobby': 1, 'procedure_room': 2}
+    parsed_rooms should look like: {'lobby': 1, 'procedure room': 2}
     """
     wall_px = int(wall_thickness_ft * scale)
     margin = 20
-    top_row = []
-    bottom_row = []
 
     room_list = []
     for room_type, count in parsed_rooms.items():
+        if not isinstance(count, int) or count <= 0:
+            continue  # Skip invalid counts
+
         if room_type in ROOM_DATABASE:
             room_info = ROOM_DATABASE[room_type]
 
@@ -36,8 +37,11 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
             else:
                 width, height = estimate_size_ft(room_info)
 
+            # Use 'name' if defined, otherwise fallback to room_type
+            room_name = room_info.get("name", room_type)
+
             for i in range(count):
-                label = f"{room_info['name']} {i+1}" if count > 1 else room_info["name"]
+                label = f"{room_name} {i+1}" if count > 1 else room_name
                 room_list.append((label, width, height))
         else:
             print(f"⚠️ Room type not found in database: {room_type}")
@@ -46,12 +50,12 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
         print("❌ No valid rooms were added to the layout.")
         return None
 
-    # Split into top and bottom rows
+    # Split into two rows (top/bottom)
     mid = len(room_list) // 2
     top_row = room_list[:mid]
     bottom_row = room_list[mid:]
 
-    # Calculate canvas size
+    # Calculate layout dimensions in feet
     top_width = sum(r[1] for r in top_row)
     bottom_width = sum(r[1] for r in bottom_row)
     canvas_width_ft = max(top_width, bottom_width)
@@ -59,7 +63,7 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
     bottom_height = max((r[2] for r in bottom_row), default=0)
     canvas_height_ft = top_height + bottom_height + corridor_width_ft + 2 * wall_thickness_ft
 
-    # Convert to pixels
+    # Convert to pixel dimensions
     img_w = int((canvas_width_ft + 2 * wall_thickness_ft) * scale) + 2 * margin
     img_h = int(canvas_height_ft * scale) + 2 * margin
     img = Image.new("RGB", (img_w, img_h), "white")
@@ -79,7 +83,7 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
             draw.text((x1 + 5, y1 + 5), name, fill="black")
             x_cursor_ft += w_ft
 
-    # Draw rooms
+    # Draw both rows
     draw_rooms(top_row, 0)
     draw_rooms(bottom_row, top_height + corridor_width_ft)
 
