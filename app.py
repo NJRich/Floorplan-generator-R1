@@ -20,6 +20,7 @@ if st.button("Generate Floor Plan"):
 
         try:
             parsed_rooms = parse_prompt(user_input)
+            st.write("🧾 Parsed room dictionary:", parsed_rooms)  # Debug output
 
             if not parsed_rooms:
                 st.error("No valid rooms were parsed from your prompt. Please make sure the room names match what's in the database.")
@@ -28,7 +29,7 @@ if st.button("Generate Floor Plan"):
 
                 if image:
                     st.success("✅ Floor plan generated!")
-                    st.image(image, caption="Generated Floor Plan", use_column_width=True)
+                    st.image(image, caption="Generated Floor Plan", use_container_width=True)
                 else:
                     st.error("Something went wrong — no image was generated.")
         except Exception as e:
