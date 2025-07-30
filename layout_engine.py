@@ -43,7 +43,7 @@ def estimate_size_ft(room_data):
     side = math.sqrt(sqft)
     return round(side, 1), round(side, 1)
 
-def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0):
+def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corridor_width_ft=6.0, max_bounds_ft=None):
     """
     Takes parsed_rooms as a dictionary and returns a Pillow image with a basic floor plan.
     parsed_rooms should look like: {'lobby': 1, 'procedure room': 2}
@@ -90,6 +90,12 @@ def generate_layout_image(parsed_rooms, scale=10, wall_thickness_ft=0.5, corrido
     top_height = max((r[2] for r in top_row), default=0)
     bottom_height = max((r[2] for r in bottom_row), default=0)
     canvas_height_ft = top_height + bottom_height + corridor_width_ft + 2 * wall_thickness_ft
+    # Clip layout dimensions to uploaded floor plan bounds (if provided)
+    if max_bounds_ft:
+        max_w, max_h = max_bounds_ft
+        canvas_width_ft = min(canvas_width_ft, max_w)
+        canvas_height_ft = min(canvas_height_ft, max_h)
+
 
     # Convert to pixel dimensions
     img_w = int((canvas_width_ft + 2 * wall_thickness_ft) * scale) + 2 * margin
