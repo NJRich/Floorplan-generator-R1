@@ -38,36 +38,29 @@ def parse_prompt(prompt, room_data=None):
 
     known_rooms = list(room_data.keys())
 
-    # Match examples like:
-    # - "3 patient rooms"
-    # - "a pantry"
-    # - "1 nurse station"
+    # Match examples like "3 patient rooms", "a pantry", "1 nurse station"
     pattern = r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z ]+?)(?:s| room| rooms)?(?=,|\.|\s|$)'
     matches = re.findall(pattern, prompt)
 
     for count_str, raw_room in matches:
         count = int(count_str) if count_str else 1
-        room_candidate = singularize(raw_room.strip().replace(" ", "_"))
+        cleaned = singularize(raw_room.strip().replace(" ", "_"))  # e.g. nurse station → nurse_station
 
         matched = None
-
-        # Try exact match
-        if room_candidate in room_data:
-            matched = room_candidate
-        # Try with _room suffix
-        elif f"{room_candidate}_room" in room_data:
-            matched = f"{room_candidate}_room"
-        # Try fuzzy match by removing underscores
+        if cleaned in room_data:
+            matched = cleaned
+        elif f"{cleaned}_room" in room_data:
+            matched = f"{cleaned}_room"
         else:
             for r in known_rooms:
-                if room_candidate.replace("_", "") == r.replace("_", ""):
+                if cleaned.replace("_", "") == r.replace("_", ""):
                     matched = r
                     break
 
         if matched:
             room_counts[matched] = room_counts.get(matched, 0) + count
         else:
-            print(f"[!] Skipped: '{raw_room.strip()}' → '{room_candidate}' not found in room database.")
+            print(f"[!] Skipped: '{raw_room.strip()}' → '{cleaned}' not found in room database.")
 
     print("🧾 Parsed room counts:", room_counts)
     return room_counts
