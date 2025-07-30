@@ -1,3 +1,31 @@
+import cv2
+import numpy as np
+
+def extract_outline_bbox(uploaded_file, dpi=96, scale=10):
+    """
+    Reads the uploaded PNG file and extracts the bounding box (in ft).
+    Assumes black outline on white background.
+    """
+    # Convert uploaded_file to OpenCV image
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_GRAYSCALE)
+
+    _, thresh = cv2.threshold(img, 240, 255, cv2.THRESH_BINARY_INV)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if not contours:
+        return None
+
+    x, y, w, h = cv2.boundingRect(contours[0])
+    
+    # Convert px to ft using DPI
+    inches_w = w / dpi
+    inches_h = h / dpi
+    ft_w = round(inches_w / 12, 1)
+    ft_h = round(inches_h / 12, 1)
+
+    return (ft_w, ft_h)  # width_ft, height_ft
+
 import json
 from PIL import Image, ImageDraw
 import math
