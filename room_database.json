@@ -1,33 +1,62 @@
 {
-  "patient room": {
+  "patient_room": {
+    "name": "Patient Room",
     "recommended_size_sqft": 150,
     "preferred_ratio": [3, 2],
     "notes": "Standard single-bed inpatient room"
   },
-  "nurse station": {
+  "nurse_station": {
+    "name": "Nurse Station",
     "recommended_size_sqft": 100,
-    "preferred_ratio": [2, 1]
+    "preferred_ratio": [2, 1],
+    "notes": "Central clinical workstation"
   },
-  "medication room": {
+  "dirty_utility": {
+    "name": "Dirty Utility",
+    "recommended_size_sqft": 60,
+    "preferred_ratio": [2, 1],
+    "notes": "For soiled materials and waste"
+  },
+  "clean_utility": {
+    "name": "Clean Utility",
+    "recommended_size_sqft": 70,
+    "preferred_ratio": [2, 1],
+    "notes": "Storage of clean supplies"
+  },
+  "medication_room": {
+    "name": "Medication Room",
     "recommended_size_sqft": 80,
-    "preferred_ratio": [2, 1]
+    "preferred_ratio": [2, 1],
+    "notes": "For med prep and dispensing"
   },
-  "clean utility": {
-    "recommended_size_sqft": 60,
-    "preferred_ratio": [2, 1]
-  },
-  "dirty utility": {
-    "recommended_size_sqft": 60,
-    "preferred_ratio": [2, 1]
+  "lobby": {
+    "name": "Entry Lobby",
+    "recommended_size_sqft": 100,
+    "preferred_ratio": [2, 1],
+    "notes": "Public entry area"
   },
   "corridor": {
+    "name": "Corridor",
     "recommended_size_sqft": 200,
     "preferred_ratio": [10, 1],
     "notes": "Main hallway connector"
   },
-  "entry lobby": {
-    "recommended_size_sqft": 100,
-    "preferred_ratio": [2, 1]
+  "procedure_room": {
+    "name": "Procedure Room",
+    "recommended_size_sqft": 200,
+    "preferred_ratio": [4, 3],
+    "notes": "For exams or minor procedures"
+  },
+  "exam_room": {
+    "name": "Exam Room",
+    "recommended_size_sqft": 120,
+    "preferred_ratio": [3, 2],
+    "notes": "Outpatient exam space"
+  },
+  "pantry": {
+    "name": "Pantry",
+    "recommended_size_sqft": 60,
+    "preferred_ratio": [2, 1],
+    "notes": "Staff break and refresh area"
   }
 }
-
