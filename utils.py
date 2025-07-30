@@ -32,13 +32,17 @@ def parse_prompt(prompt, room_data=None):
         room_data = load_room_database()
 
     known_rooms = list(room_data.keys())
+    print("📦 Known room types:", known_rooms)
 
-    # Match phrases like: "20 patient rooms", "a nurse station", "1 dirty utility"
-    matches = re.findall(r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z ]+?)(?:s| room| rooms)?(?=,|\.|\s|$)', prompt)
+    # Match examples like: "20 patient rooms", "a nurse station", "1 dirty utility"
+    pattern = r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z ]+?)(?:s| room| rooms)?(?=,|\.|\s|$)'
+    matches = re.findall(pattern, prompt)
+    print("🔍 Matches found:", matches)
 
     for count_str, raw_room in matches:
         count = int(count_str) if count_str else 1
 
+        # Clean up room name
         words = raw_room.strip().lower().split()
         if not words:
             continue
