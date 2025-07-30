@@ -36,27 +36,38 @@ def parse_prompt(prompt, room_data=None):
     if room_data is None:
         room_data = load_room_database()
 
-    # Match phrases like "3 exam rooms", "a pantry", "1 restroom", etc.
-    matches = re.findall(r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z_ ]+?)(?:s|room|rooms)?(?:,|\.|\s|$)', prompt)
+    known_rooms = list(room_data.keys())
 
-    for count_str, room_str in matches:
+    # Match examples like:
+    # - "3 patient rooms"
+    # - "a pantry"
+    # - "1 nurse station"
+    pattern = r'(?:(\d+)|\ba\b|\ban\b)?\s*([a-zA-Z ]+?)(?:s| room| rooms)?(?=,|\.|\s|$)'
+    matches = re.findall(pattern, prompt)
+
+    for count_str, raw_room in matches:
         count = int(count_str) if count_str else 1
-        base = singularize(room_str.strip().replace(" ", "_"))
+        room_candidate = singularize(raw_room.strip().replace(" ", "_"))
+
+        matched = None
 
         # Try exact match
-        if base in room_data:
-            cleaned = base
-        # Try appending '_room' if needed
-        elif f"{base}_room" in room_data:
-            cleaned = f"{base}_room"
-        # Try matching just the base word
-        elif base.replace("_", "") in [k.replace("_", "") for k in room_data]:
-            cleaned = next(k for k in room_data if k.replace("_", "") == base.replace("_", ""))
+        if room_candidate in room_data:
+            matched = room_candidate
+        # Try with _room suffix
+        elif f"{room_candidate}_room" in room_data:
+            matched = f"{room_candidate}_room"
+        # Try fuzzy match by removing underscores
         else:
-            print(f"[!] Warning: Room '{room_str.strip()}' → '{base}' not in room_database.json — skipped.")
-            continue
+            for r in known_rooms:
+                if room_candidate.replace("_", "") == r.replace("_", ""):
+                    matched = r
+                    break
 
-        room_counts[cleaned] = room_counts.get(cleaned, 0) + count
+        if matched:
+            room_counts[matched] = room_counts.get(matched, 0) + count
+        else:
+            print(f"[!] Skipped: '{raw_room.strip()}' → '{room_candidate}' not found in room database.")
 
     print("🧾 Parsed room counts:", room_counts)
     return room_counts
