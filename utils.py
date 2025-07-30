@@ -31,19 +31,25 @@ def parse_prompt(prompt, room_data=None):
     if room_data is None:
         room_data = load_room_database()
 
-    # Force raw check for keywords
-    keywords = {
-        "patient room": "patient_room",
-        "nurse station": "nurse_station",
-        "dirty utility": "dirty_utility"
-    }
+    known_rooms = list(room_data.keys())  # e.g. patient_room, nurse_station
 
-    for phrase, key in keywords.items():
-        if phrase in prompt:
-            match = re.search(r'(\d+)\s+' + re.escape(phrase), prompt)
-            count = int(match.group(1)) if match else 1
+    # Pre-clean: replace "an"/"a" with 1 to simplify
+    prompt = re.sub(r'\b(an|a)\b', '1', prompt)
+
+    # Loop through known room types and match them in prompt
+    for key in known_rooms:
+        # Turn patient_room → patient room for matching
+        room_phrase = key.replace("_", " ")
+
+        match = re.search(rf'(\d+)\s+{re.escape(room_phrase)}', prompt)
+        if match:
+            count = int(match.group(1))
             room_counts[key] = count
-            print(f"[✓] Force matched: '{phrase}' → {key} × {count}")
+            print(f"[✓] Matched: {room_phrase} → {key} × {count}")
+        elif room_phrase in prompt:
+            # No number, default to 1
+            room_counts[key] = room_counts.get(key, 0) + 1
+            print(f"[•] Inferred: {room_phrase} → {key} × 1")
 
-    print("🧾 TEMP parsed room counts:", room_counts)
+    print("🧾 Final parsed room counts:", room_counts)
     return room_counts
