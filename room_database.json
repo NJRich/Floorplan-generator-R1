@@ -1,146 +1,33 @@
 {
-  "lobby": {
-    "name": "Lobby",
-    "min_size_sqft": 200,
-    "max_size_sqft": 500,
-    "recommended_size_sqft": 350,
-    "source": "BOMA",
-    "size_ft": [
-      18.7,
-      18.7
-    ]
-  },
-  "exam_room": {
-    "name": "Exam Room",
-    "min_size_sqft": 100,
-    "max_size_sqft": 130,
-    "recommended_size_sqft": 120,
-    "source": "VA",
-    "size_ft": [
-      11.0,
-      11.0
-    ]
-  },
-  "procedure_room": {
-    "name": "Procedure Room",
-    "min_size_sqft": 160,
-    "max_size_sqft": 250,
-    "recommended_size_sqft": 200,
-    "source": "VA",
-    "size_ft": [
-      14.1,
-      14.1
-    ]
-  },
-  "patient_room": {
-    "name": "Patient Room",
-    "min_size_sqft": 150,
-    "max_size_sqft": 250,
-    "recommended_size_sqft": 200,
-    "source": "VA",
-    "size_ft": [
-      14.1,
-      14.1
-    ]
-  },
-  "operating_room": {
-    "name": "Operating Room",
-    "min_size_sqft": 400,
-    "max_size_sqft": 600,
-    "recommended_size_sqft": 500,
-    "source": "VA",
-    "size_ft": [
-      22.4,
-      22.4
-    ]
-  },
-  "nurse_station": {
-    "name": "Nurse Station",
-    "min_size_sqft": 80,
-    "max_size_sqft": 150,
-    "recommended_size_sqft": 120,
-    "source": "VA",
-    "size_ft": [
-      11.0,
-      11.0
-    ]
-  },
-  "waiting_area": {
-    "name": "Waiting Area",
-    "min_size_sqft": 15,
-    "max_size_sqft": 20,
-    "recommended_size_sqft": 18,
-    "note": "per occupant",
-    "source": "BOMA",
-    "size_ft": [
-      4.2,
-      4.2
-    ]
-  },
-  "private_office": {
-    "name": "Private Office",
-    "min_size_sqft": 90,
-    "max_size_sqft": 150,
-    "recommended_size_sqft": 120,
-    "source": "BOMA",
-    "size_ft": [
-      11.0,
-      11.0
-    ]
-  },
-  "open_office": {
-    "name": "Open Office Workstation",
-    "min_size_sqft": 36,
-    "max_size_sqft": 64,
-    "recommended_size_sqft": 48,
-    "source": "BOMA",
-    "size_ft": [
-      6.9,
-      6.9
-    ]
-  },
-  "conference_room": {
-    "name": "Conference Room",
-    "min_size_sqft": 120,
-    "max_size_sqft": 300,
-    "recommended_size_sqft": 200,
-    "source": "BOMA",
-    "size_ft": [
-      14.1,
-      14.1
-    ]
-  },
-  "staff_lounge": {
-    "name": "Staff Lounge",
-    "min_size_sqft": 100,
-    "max_size_sqft": 200,
+  "patient room": {
     "recommended_size_sqft": 150,
-    "source": "UCSF",
-    "size_ft": [
-      12.2,
-      12.2
-    ]
+    "preferred_ratio": [3, 2],
+    "notes": "Standard single-bed inpatient room"
   },
-  "restroom": {
-    "name": "Restroom",
-    "min_size_sqft": 50,
-    "max_size_sqft": 70,
-    "recommended_size_sqft": 60,
-    "source": "VA",
-    "size_ft": [
-      7.7,
-      7.7
-    ]
-  },
-  "pantry": {
-    "name": "Pantry / Break Area",
-    "min_size_sqft": 80,
-    "max_size_sqft": 120,
+  "nurse station": {
     "recommended_size_sqft": 100,
-    "source": "BOMA",
-    "size_ft": [
-      10.0,
-      10.0
-    ]
+    "preferred_ratio": [2, 1]
+  },
+  "medication room": {
+    "recommended_size_sqft": 80,
+    "preferred_ratio": [2, 1]
+  },
+  "clean utility": {
+    "recommended_size_sqft": 60,
+    "preferred_ratio": [2, 1]
+  },
+  "dirty utility": {
+    "recommended_size_sqft": 60,
+    "preferred_ratio": [2, 1]
+  },
+  "corridor": {
+    "recommended_size_sqft": 200,
+    "preferred_ratio": [10, 1],
+    "notes": "Main hallway connector"
+  },
+  "entry lobby": {
+    "recommended_size_sqft": 100,
+    "preferred_ratio": [2, 1]
   }
 }
+
