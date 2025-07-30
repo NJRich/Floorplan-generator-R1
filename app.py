@@ -11,6 +11,14 @@ st.write("Describe your space and we'll generate a basic schematic layout.")
 # Input prompt
 user_input = st.text_area("📝 Describe your space:", placeholder="e.g. a hospital with 2 procedure rooms, a lobby and 4 patient rooms")
 
+uploaded_file = st.file_uploader("📐 Upload floor outline (PNG only)", type=["png"])
+outline_bbox = None
+
+if uploaded_file:
+    from layout_engine import extract_outline_bbox
+    outline_bbox = extract_outline_bbox(uploaded_file)
+    st.success(f"Detected floor outline boundary: {outline_bbox} ft")
+
 # Button to generate layout
 if st.button("Generate Floor Plan"):
     if not user_input.strip():
